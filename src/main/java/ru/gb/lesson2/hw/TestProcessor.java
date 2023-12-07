@@ -3,7 +3,8 @@ package ru.gb.lesson2.hw;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class TestProcessor {
@@ -28,15 +29,19 @@ public class TestProcessor {
       throw new RuntimeException("Не удалось создать объект класса \"" + testClass.getName() + "\"");
     }
 
-    List<Method> methods = new ArrayList<>();
-    for (Method method : testClass.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(Test.class)) {
-        checkTestMethod(method);
-        methods.add(method);
-      }
-    }
+    List<Method> before = new ListAnnForTest().methodsWithAnnotations(testClass, BeforeEach.class);
+    List<Method> after = new ListAnnForTest().methodsWithAnnotations(testClass, AfterEach.class);
 
-    methods.forEach(it -> runTest(it, testObj));
+    List<Method> methods = Arrays.stream(testClass.getDeclaredMethods())
+            .filter(x -> x.isAnnotationPresent(Test.class)&& !x.isAnnotationPresent(Skip.class))
+            .peek(TestProcessor::checkTestMethod)
+            .sorted(Comparator.comparingInt(x->x.getAnnotation(Test.class).order())).
+            toList();
+
+    methods.forEach((x)-> {
+      printMethod(before,testObj);
+      runTest(x,testObj);
+      printMethod(after,testObj);});
   }
 
   private static void checkTestMethod(Method method) {
@@ -51,8 +56,10 @@ public class TestProcessor {
     } catch (InvocationTargetException | IllegalAccessException e) {
       throw new RuntimeException("Не удалось запустить тестовый метод \"" + testMethod.getName() + "\"");
     } catch (AssertionError e) {
-
     }
+  }
+  private static void printMethod(List<Method> methods,Object obj){
+    methods.forEach(x -> runTest(x,obj));
   }
 
 }

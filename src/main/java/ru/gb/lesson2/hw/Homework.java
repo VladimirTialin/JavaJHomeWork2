@@ -30,6 +30,33 @@ public class Homework {
     void secondTest() {
       System.out.println("secondTest запущен");
     }
+    @BeforeEach
+    void thirdTest() {
+      System.out.println("thirdTest запущен");
+    }
+
+    @Test
+    void fourthTest() {
+      System.out.println("fourthTest запущен");
+    }
+    @AfterEach
+    void  fifthTest() {
+      System.out.println("fifthTest запущен");
+    }
+    @Test(order = -2)
+    void orderTest() {
+      System.out.println("orderTest запущен");
+    }
+    @Test(order = 5)
+    void orderTest2() {
+      System.out.println("orderTest2 запущен");
+    }
+    @Test
+    void orderTest3() {
+      System.out.println("orderTest3 запущен");
+    }
+
+
 
   }
 
